@@ -1,0 +1,39 @@
+{
+  "name": "utc_date",
+  "description": "JavaScript Date replacement that only works with fixed UTC offset.",
+  "version": "0.1.0",
+  "homepage": "https://github.com/ichernev/utc_date",
+  "author": {
+    "name": "Iskren Chernev",
+    "email": "iskren.chernev@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/ichernev/utc_date.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ichernev/utc_date/issues"
+  },
+  "licenses": [
+    {
+      "type": "BSD-3-Clause",
+      "url": "https://github.com/ichernev/utc_date/blob/master/LICENSE-BSD-3-Clause"
+    }
+  ],
+  "main": "lib/utc_date",
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "scripts": {
+    "test": "grunt mocha"
+  },
+  "devDependencies": {
+    "mocha": "1.17.1",
+    "chai": "1.9.0",
+    "grunt-mocha-test": "0.10.0",
+    "grunt-contrib-jshint": "~0.6.4",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt": "~0.4.4"
+  },
+  "keywords": []
+}
