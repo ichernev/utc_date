@@ -69,11 +69,41 @@ describe("utc_date", function() {
     d.getUTCMonth().should.equal(11);
   });
 
+  it("doesn't use recursion", function() {
+    var d = new utc_date.Date();
+    // This wouldn't work with recursive setUTCDate
+    d.setUTCDate(10000000);
+  });
+
+  it("handles setMonth like browsers (+ days in months)", function() {
+    var d = new utc_date.Date();
+    d.setUTCMonth(2); // Mar
+    d.setUTCDate(1);
+
+    d.setUTCMonth(3); // Apr
+    // Adding a month preserves the date
+    d.getUTCMonth().should.equal(3);
+    d.getUTCDate().should.equal(1);
+
+    d.setUTCMonth(4); // May
+    // Adding a month preserves the date, in any number-of-days per month
+    d.getUTCMonth().should.equal(4);
+    d.getUTCDate().should.equal(1);
+
+    d.setUTCDate(31);
+    d.getUTCMonth().should.equal(4);
+    d.getUTCDate().should.equal(31);
+
+    d.setUTCMonth(5); // Jun
+    // 31 May + 1 month skips to 1st Jul
+    d.getUTCMonth().should.equal(6);
+    d.getUTCDate().should.equal(1);
+  });
+
+  it("handles the rest of the items");
   it("handles fixed offset");
   it("uses _X for private stuff");
-  it("handles the rest of the items");
   it("handles leap years");
   it("handles multiple arguments");
-  it("doesn't use recursion");
   it("handles valueOf");
 });
