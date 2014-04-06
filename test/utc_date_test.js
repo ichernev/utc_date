@@ -100,10 +100,37 @@ describe("utc_date", function() {
     d.getUTCDate().should.equal(1);
   });
 
-  it("handles the rest of the items");
-  it("handles fixed offset");
-  it("uses _X for private stuff");
-  it("handles leap years");
-  it("handles multiple arguments");
+  it("handles year", function () {
+    var d = new utc_date.Date();
+    d.setUTCFullYear(2000);
+    d.getUTCFullYear().should.equal(2000);
+
+    d.setUTCFullYear(-1234567);
+    d.getUTCFullYear().should.equal(-1234567);
+  });
+
+  it("handles minutes", function () {
+    var d = new utc_date.Date();
+
+    d.setUTCHours(5);
+    d.setUTCMinutes(30);
+
+    d.setUTCMinutes(45);
+    d.getUTCHours().should.equal(5);
+    d.getUTCMinutes().should.equal(45);
+
+    d.setUTCMinutes(75);
+    d.getUTCHours().should.equal(6);
+    d.getUTCMinutes().should.equal(15);
+
+    d.setUTCMinutes(-15);
+    d.getUTCHours().should.equal(5);
+    d.getUTCMinutes().should.equal(45);
+  });
+
   it("handles valueOf");
+  it("handles fixed offset (with adjusting time before/after)");
+  it("handles multiple arguments");
+  it("handles random test vs js Date");
+  it("uses an array to store units");
 });
