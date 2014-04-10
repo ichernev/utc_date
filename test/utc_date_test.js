@@ -246,6 +246,8 @@ describe("utc_date", function() {
       d.daysInMonth(2001, 10).should.equal(30);
       d.daysInMonth(2001, 11).should.equal(31);
     });
+
+    it("accepts month over/underflow (< 0, > 11)");
   });
 
   describe("multiple setter arguments", function () {
@@ -255,7 +257,6 @@ describe("utc_date", function() {
 
   it("handles valueOf");
   it("handles fixed offset (with adjusting time before/after)");
-  it("handles multiple arguments");
   it("handles random test vs js Date");
   it("uses an array to store units");
 });
