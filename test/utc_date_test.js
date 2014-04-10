@@ -250,12 +250,23 @@ describe("utc_date", function() {
     it("accepts month over/underflow (< 0, > 11)");
   });
 
-  describe("multiple setter arguments", function () {
-    it("setUTCMonth(M, d)");
-    it("setUTCHours(h, m, s, ms)");
+  it("handles valueOf", function () {
+    new UTCDate(1900).valueOf().should.equal(-2208988800000);
+    new UTCDate(1970).valueOf().should.equal(0);
+    new UTCDate(1970, 0, 1, 0, 0, 1).valueOf().should.equal(1000);
+    new UTCDate(1970, 0, 1, 0, 1, 0).valueOf().should.equal(60000);
+    new UTCDate(2014, 3, 10, 5, 13, 11).valueOf().should.equal(1397106791000);
   });
 
-  it("handles valueOf");
+  describe("multiple setter arguments", function () {
+    it("setUTCFullYear(y, M, d)");
+    it("setUTCMonth(M, d)");
+    it("setUTCHours(h, m, s, ms)");
+    it("setUTCMinutes(m, s, ms)");
+    it("setUTCSeconds(s, ms)");
+  });
+
+  it("converts all unit inputs to integer");
   it("handles fixed offset (with adjusting time before/after)");
   it("handles random test vs js Date");
   it("uses an array to store units");
