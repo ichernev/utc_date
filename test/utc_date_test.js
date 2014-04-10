@@ -68,16 +68,24 @@ describe("utc_date", function() {
   });
 
   it("handles month", function () {
-    var d = new UTCDate();
+    var d;
 
+    d = new UTCDate(2000);
     d.setUTCMonth(5);
     d.getUTCMonth().should.equal(5);
 
+    d = new UTCDate(2000);
     d.setUTCMonth(12);
+    d.getUTCFullYear().should.equal(2001);
     d.getUTCMonth().should.equal(0);
 
     d.setUTCMonth(-1);
+    d.getUTCFullYear().should.equal(2000);
     d.getUTCMonth().should.equal(11);
+
+    d.setUTCMonth(-12);
+    d.getUTCFullYear().should.equal(1999);
+    d.getUTCMonth().should.equal(0);
   });
 
   it("doesn't use recursion", function() {
@@ -258,6 +266,19 @@ describe("utc_date", function() {
     new UTCDate(2014, 3, 10, 5, 13, 11).valueOf().should.equal(1397106791000);
   });
 
+  it("handles toISOString", function () {
+    new UTCDate(1900).toISOString().should.equal("1900-01-01T00:00:00.000Z");
+    new UTCDate(1900, 5, 6, 7, 8, 9, 10).toISOString().should.equal(
+        "1900-06-06T07:08:09.010Z");
+    new UTCDate(1900, 10, 20, 14, 12, 30).toISOString().should.equal(
+        "1900-11-20T14:12:30.000Z");
+    new UTCDate(1900, 10, 20, 14, 0, 30, 123).toISOString().should.equal(
+        "1900-11-20T14:00:30.123Z");
+  });
+
+  it("converts all unit inputs to integer");
+  it("handles fixed offset (with adjusting time before/after)");
+
   describe("multiple setter arguments", function () {
     it("setUTCFullYear(y, M, d)");
     it("setUTCMonth(M, d)");
@@ -266,8 +287,5 @@ describe("utc_date", function() {
     it("setUTCSeconds(s, ms)");
   });
 
-  it("converts all unit inputs to integer");
-  it("handles fixed offset (with adjusting time before/after)");
-  it("handles random test vs js Date");
   it("uses an array to store units");
 });
