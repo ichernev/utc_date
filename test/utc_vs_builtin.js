@@ -1,5 +1,5 @@
 var UTCDate = require('../lib/utc_date'),
-    random = require('./random');
+    chance = require('chance')(42);
 
 require('chai').should();
 
@@ -29,8 +29,8 @@ describe("utc_date correctness", function () {
     d2.valueOf().should.equal(d1.valueOf());
 
     for (i = 0; i < 1000; ++i) {
-      setter = random.choose(setters);
-      value = random.range(ranges[setter][0], ranges[setter][1]);
+      setter = chance.pick(setters);
+      value = chance.natural({min: ranges[setter][0], max: ranges[setter][1]});
       // console.log(d1.toISOString(), setter, value);
       d1[setter](value);
       d2[setter](value);
