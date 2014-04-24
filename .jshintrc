@@ -1,4 +1,5 @@
 {
+  "indent": 4,
   "curly": true,
   "eqeqeq": true,
   "immed": true,
@@ -12,6 +13,7 @@
   "eqnull": true,
   "node": true,
   "globals": {
+    "define": false,
     "describe": false,
     "it": false,
     "before": false,
