@@ -276,8 +276,345 @@ describe("utc_date", function() {
         "1900-11-20T14:00:30.123Z");
   });
 
+  describe("localtime getters", function () {
+    it("handles getHours", function () {
+      var d = new UTCDate(2000, 0, 1, 12, 0, 0);
+      d.setTimezoneOffset(6 * 60);  // UTC-6
+      d.getHours().should.equal(6);
+
+      d.setUTCHours(18);
+      d.getHours().should.equal(12);
+
+      d.setUTCHours(3);
+      d.getHours().should.equal(21);
+    });
+
+    it("handles getMinutes", function () {
+      var d = new UTCDate(2000, 0, 1, 12, 0, 0);
+      d.setTimezoneOffset(6 * 60);  // UTC-6
+      d.getMinutes().should.equal(0);
+
+      d.setUTCMinutes(30);
+      d.getMinutes().should.equal(30);
+
+      d.setTimezoneOffset(6 * 60 + 30);
+      d.setUTCMinutes(30);
+      d.getMinutes().should.equal(0);
+    });
+  });
+
+  describe("localtime setters", function () {
+    describe("far from DST, full hour offset", function () {
+      beforeEach(function () {
+        // Offset is fixed, so DST doesn't play role.
+        UTCDate.determineTimezoneOffset =
+            UTCDate.createFixedTimezoneOffset(6 * 60);  // UTC-6
+      });
+
+      afterEach(function () {
+        UTCDate.determineTimezoneOffset = UTCDate.timezoneOffsetFromDate;
+      });
+
+      it("handles milliseconds", function () {
+        var d = new UTCDate(2000, 0, 1, 12, 0, 0);
+
+        d.setMilliseconds(123);
+        d.getMilliseconds().should.equal(123);
+        d.getUTCMilliseconds().should.equal(123);
+      });
+
+      it("handles seconds", function () {
+        var d = new UTCDate(2000, 0, 1, 12, 0, 0);
+
+        d.setSeconds(35);
+        d.getSeconds().should.equal(35);
+        d.getUTCSeconds().should.equal(35);
+      });
+
+      it("handles minutes with full-hour offset", function () {
+        var d = new UTCDate(2000, 0, 1, 12, 0, 0);
+        d.setTimezoneOffset(6 * 60);  // UTC-6
+
+        d.setMinutes(15);
+        d.getMinutes().should.equal(15);
+        d.getUTCMinutes().should.equal(15);
+      });
+
+      it("handles hours", function () {
+        var d = new UTCDate(2000, 0, 1, 12, 0, 0);
+
+        d.getHours().should.equal(6);
+
+        d.setHours(5);
+        d.getHours().should.equal(5);
+        d.getUTCHours().should.equal(11);
+
+        d.setHours(22);
+        d.getHours().should.equal(22);
+        d.getUTCHours().should.equal(4);
+        d.getUTCDate().should.equal(2);
+      });
+
+      it("handles dates", function () {
+        var d = new UTCDate(2000, 0, 1, 12, 0, 0);
+
+        d.getDate().should.equal(1);
+
+        d.setDate(2);
+        d.getDate().should.equal(2);
+        d.getUTCDate().should.equal(2);
+        d.getHours().should.equal(6);
+        d.getUTCHours().should.equal(12);
+      });
+
+      it("handles months", function() {
+        var d = new UTCDate(2000, 0, 1, 12, 0, 0);
+
+        d.getMonth().should.equal(0);
+
+        d.setMonth(1);
+        d.getMonth().should.equal(1);
+        d.getUTCMonth().should.equal(1);
+        d.getDate().should.equal(1);
+        d.getUTCDate().should.equal(1);
+        d.getHours().should.equal(6);
+        d.getUTCHours().should.equal(12);
+      });
+
+      it("handles years", function() {
+        var d = new UTCDate(2000, 0, 1, 12, 0, 0);
+
+        d.getFullYear().should.equal(2000);
+
+        d.setFullYear(1999); d.getFullYear().should.equal(1999);
+        d.setMonth(11); d.getMonth().should.equal(11);
+        d.setDate(31); d.getDate().should.equal(31);
+        d.setHours(22); d.getHours().should.equal(22);
+        d.setMinutes(0); d.getMinutes().should.equal(0);
+        d.setSeconds(0); d.getSeconds().should.equal(0);
+        d.setMilliseconds(0); d.getMilliseconds().should.equal(0);
+
+        d.getUTCFullYear().should.equal(2000);
+        d.getUTCMonth().should.equal(0);
+        d.getUTCDate().should.equal(1);
+        d.getUTCHours().should.equal(4);
+        d.getUTCMinutes().should.equal(0);
+        d.getUTCSeconds().should.equal(0);
+        d.getUTCMilliseconds().should.equal(0);
+      });
+    });
+
+    describe("far from DST, half hour offset", function () {
+      beforeEach(function () {
+        // Offset is fixed, so DST doesn't play role.
+        UTCDate.determineTimezoneOffset =
+            UTCDate.createFixedTimezoneOffset(6 * 60 + 30);  // UTC-6:30
+      });
+
+      afterEach(function () {
+        UTCDate.determineTimezoneOffset = UTCDate.timezoneOffsetFromDate;
+      });
+
+      it("handles minutes", function () {
+        var d = new UTCDate(2000, 0, 1, 12, 0, 0);
+
+        d.setMinutes(15);
+        d.getMinutes().should.equal(15);
+        d.getUTCMinutes().should.equal(45);
+        d.getUTCHours().should.equal(11);
+
+        d.setMinutes(45);
+        d.getMinutes().should.equal(45);
+        d.getUTCMinutes().should.equal(15);
+        d.getUTCHours().should.equal(12);
+      });
+    });
+
+    describe("over DST -1", function () {
+      beforeEach(function () {
+        // on 1st Jan 12:00 UTC switch from -5 to -6 (one hour back)
+        var cutoff = +(new UTCDate(2000, 0, 1, 12, 0, 0, 0));
+        UTCDate.determineTimezoneOffset = function (utc_date) {
+          if (+utc_date < cutoff) {
+            return 5 * 60;  // UTC-5
+          } else {
+            return 6 * 60;  // UTC-6
+          }
+        };
+      });
+
+      afterEach(function () {
+        UTCDate.determineTimezoneOffset = UTCDate.timezoneOffsetFromDate;
+      });
+
+      it("handles increasing hours", function () {
+        var d = new UTCDate(2000, 0, 1, 10, 0, 0, 0);
+
+        d.getHours().should.equal(5);
+        d.getTimezoneOffset().should.equal(5 * 60);
+
+        d.setHours(8);
+        d.getHours().should.equal(8);
+        d.getUTCHours().should.equal(14);
+        d.getTimezoneOffset().should.equal(6 * 60);
+      });
+
+      it("handles decreasing hours", function () {
+        var d = new UTCDate(2000, 0, 1, 14, 0, 0, 0);
+
+        d.getHours().should.equal(8);
+        d.getTimezoneOffset().should.equal(6 * 60);
+
+        d.setHours(5);
+        d.getHours().should.equal(5);
+        d.getUTCHours().should.equal(10);
+        d.getTimezoneOffset().should.equal(5 * 60);
+      });
+    });
+
+    describe("near DST +1", function () {
+      beforeEach(function () {
+        // on 1st Jan 12:00 UTC switch from -6 to -5 (one hour forward)
+        var cutoff = +(new UTCDate(2000, 0, 1, 12, 0, 0, 0));
+        UTCDate.determineTimezoneOffset = function (utc_date) {
+          if (+utc_date < cutoff) {
+            return 6 * 60;  // UTC-6
+          } else {
+            return 5 * 60;  // UTC-5
+          }
+        };
+      });
+
+      afterEach(function () {
+        UTCDate.determineTimezoneOffset = UTCDate.timezoneOffsetFromDate;
+      });
+
+      it("handles increasing hours", function () {
+        var d = new UTCDate(2000, 0, 1, 11, 0, 0, 0);
+
+        d.getHours().should.equal(5);
+        d.getTimezoneOffset().should.equal(6 * 60);
+
+        d.setHours(8);
+        d.getHours().should.equal(8);
+        d.getUTCHours().should.equal(13);
+        d.getTimezoneOffset().should.equal(5 * 60);
+      });
+
+      it("handles decreasing hours", function () {
+        var d = new UTCDate(2000, 0, 1, 13, 0, 0, 0);
+
+        d.getHours().should.equal(8);
+        d.getTimezoneOffset().should.equal(5 * 60);
+
+        d.setHours(5);
+        d.getHours().should.equal(5);
+        d.getUTCHours().should.equal(11);
+        d.getTimezoneOffset().should.equal(6 * 60);
+      });
+    });
+
+    describe("onto DST -1", function () {
+      beforeEach(function () {
+        // on 1st Jan 12:00 UTC switch from -5 to -6 (one hour back)
+        var cutoff = +(new UTCDate(2000, 0, 1, 12, 0, 0, 0));
+        UTCDate.determineTimezoneOffset = function (utc_date) {
+          if (+utc_date < cutoff) {
+            return 5 * 60;  // UTC-5
+          } else {
+            return 6 * 60;  // UTC-6
+          }
+        };
+      });
+
+      afterEach(function () {
+        UTCDate.determineTimezoneOffset = UTCDate.timezoneOffsetFromDate;
+      });
+
+      it("handles increasing hours", function () {
+        // start before DST, finish before DST
+        var d = new UTCDate(2000, 0, 1, 10, 30, 0, 0);
+
+        d.getHours().should.equal(5);
+        d.getMinutes().should.equal(30);
+        d.getTimezoneOffset().should.equal(5 * 60);
+
+        d.setHours(6);
+        d.getHours().should.equal(6);
+        d.getMinutes().should.equal(30);
+        d.getUTCHours().should.equal(11);
+        d.getTimezoneOffset().should.equal(5 * 60);
+      });
+
+      it("handles decreasing hours", function () {
+        // start after DST, finish after DST
+        var d = new UTCDate(2000, 0, 1, 13, 30, 0, 0);
+
+        d.getHours().should.equal(7);
+        d.getMinutes().should.equal(30);
+        d.getTimezoneOffset().should.equal(6 * 60);
+
+        d.setHours(6);
+        d.getHours().should.equal(6);
+        d.getMinutes().should.equal(30);
+        d.getUTCHours().should.equal(12);
+        d.getTimezoneOffset().should.equal(6 * 60);
+      });
+    });
+
+    describe("onto DST +1", function () {
+      beforeEach(function () {
+        // on 1st Jan 12:00 UTC switch from -6 to -5 (one hour forward)
+        var cutoff = +(new UTCDate(2000, 0, 1, 12, 0, 0, 0));
+        UTCDate.determineTimezoneOffset = function (utc_date) {
+          if (+utc_date < cutoff) {
+            return 6 * 60;  // UTC-6
+          } else {
+            return 5 * 60;  // UTC-5
+          }
+        };
+      });
+
+      afterEach(function () {
+        UTCDate.determineTimezoneOffset = UTCDate.timezoneOffsetFromDate;
+      });
+
+      it("handles increasing hours", function () {
+        var d = new UTCDate(2000, 0, 1, 11, 30, 0, 0);
+
+        d.getHours().should.equal(5);
+        d.getMinutes().should.equal(30);
+        d.getTimezoneOffset().should.equal(6 * 60);
+
+        d.setHours(6);
+
+        d.getHours().should.equal(7);
+        d.getMinutes().should.equal(30);
+        d.getUTCHours().should.equal(12);
+        d.getTimezoneOffset().should.equal(5 * 60);
+      });
+
+      it("handles decreasing hours", function () {
+        var d = new UTCDate(2000, 0, 1, 12, 30, 0, 0);
+
+        d.getHours().should.equal(7);
+        d.getMinutes().should.equal(30);
+        d.getTimezoneOffset().should.equal(5 * 60);
+
+        d.setHours(6);
+
+        d.getHours().should.equal(5);
+        d.getMinutes().should.equal(30);
+        d.getUTCHours().should.equal(11);
+        d.getTimezoneOffset().should.equal(6 * 60);
+      });
+    });
+  });
+
+  it("does initialization according to spec");
+  it("allows overflow in costructor");
+  it("initializes timezone offset from determineTimezoneOffset");
   it("converts all unit inputs to integer");
-  it("handles fixed offset (with adjusting time before/after)");
 
   describe("multiple setter arguments", function () {
     it("setUTCFullYear(y, M, d)");
@@ -287,5 +624,31 @@ describe("utc_date", function() {
     it("setUTCSeconds(s, ms)");
   });
 
+  describe("setTimezoneOffset", function () {
+    it("sets offset from utc POV with a single argument");
+    it("sets offset from local POV with a second true argument");
+  });
+
+  describe("getTimezoneOffset", function () {
+    it("returns the setTimezoneOffset");
+    it("returns the determineTimezoneOffset");
+  });
+
+  describe("determineTimezoneOffset", function () {
+    it("has createFixedTimezoneOffset");
+    it("has timezoneOffsetFromDate");
+    it("has manualTimezoneOffset");
+    it("is used for initializing timezoneOffset");
+    it("??? can be set per UTCDate");
+    it("??? can be defaulted for new UTCDates");
+  });
+
   it("uses an array to store units");
+
+  describe("NEXT", function () {
+    it("try to use Date as a source of UTC getters/setters");
+    it("implement add/subtract");
+    it("implement function reporting of DST edge on modify");
+    it("implement DST edge on create");
+  });
 });
