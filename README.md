@@ -19,7 +19,7 @@ d.setUTCMonth(1);
 ```
 
 ## Documentation
-This is a no-BS library for date-time, that handles DST properly
+This is a native Date replacement for anal retentives and software idealists.
 
 ### Background
 
