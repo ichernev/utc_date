@@ -20,6 +20,9 @@ module.exports = function(grunt) {
             test: {
                 src: ['test/**/*.js']
             },
+            misc: {
+                src: ['browser_tester.js']
+            }
         },
         mochaTest: {
             options: {
@@ -50,5 +53,4 @@ module.exports = function(grunt) {
 
     // Default task.
     grunt.registerTask('default', ['jshint', 'mochaTest']);
-
 };
